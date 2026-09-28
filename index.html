@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tính Tiền Cầu Lông</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --court:#173F35;
+    --court-light:#1F5748;
+    --bg:#F3F7F2;
+    --panel:#FFFFFF;
+    --cork:#E2A63B;
+    --ink:#152420;
+    --line:#DCE6DC;
+    --muted:#5C7268;
+    --danger:#B4482F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+  }
+  h1,h2,h3,.brand{font-family:'Space Grotesk',system-ui,sans-serif;}
+
+  header{
+    background:var(--court);
+    color:#F3F7F2;
+    padding:28px 24px 60px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:220px;height:220px;
+    border-radius:50%;
+    border:3px solid rgba(255,255,255,0.12);
+  }
+  .brand{
+    font-size:15px;
+    letter-spacing:0.02em;
+    color:var(--cork);
+    margin:0 0 6px;
+  }
+  header h1{
+    font-size:clamp(28px,4vw,40px);
+    margin:0 0 8px;
+    font-weight:600;
+  }
+  header p{
+    margin:0;
+    color:#CFE0D6;
+    max-width:520px;
+    line-height:1.5;
+    font-size:15px;
+  }
+
+  .wrap{
+    max-width:960px;
+    margin:-36px auto 60px;
+    padding:0 20px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:1.1fr 1fr;
+    gap:20px;
+  }
+  @media (max-width:760px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 1px 2px rgba(23,63,53,0.04);
+  }
+  .card h2{
+    font-size:17px;
+    margin:0 0 16px;
+    font-weight:600;
+  }
+
+  label{
+    display:block;
+    font-size:13px;
+    color:var(--muted);
+    margin:14px 0 6px;
+  }
+  label:first-of-type{margin-top:0;}
+  input[type=text], input[type=number]{
+    width:100%;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    font-size:14px;
+    font-family:inherit;
+    background:#FAFCFA;
+    color:var(--ink);
+  }
+  input:focus{
+    outline:2px solid var(--court-light);
+    outline-offset:1px;
+  }
+
+  .cost-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .split-choice{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+  }
+  .split-btn{
+    flex:1;
+    padding:9px 10px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:#FAFCFA;
+    color:var(--muted);
+    font-size:13px;
+    font-family:inherit;
+    cursor:pointer;
+    text-align:center;
+  }
+  .split-btn.active{
+    background:var(--court);
+    border-color:var(--court);
+    color:#fff;
+  }
+
+  .players{
+    margin-top:8px;
+  }
+  .player-row{
+    display:grid;
+    grid-template-columns:1fr 90px 32px;
+    gap:8px;
+    align-items:center;
+    margin-bottom:8px;
+  }
+  .player-row input[type=number]{text-align:right;}
+  .hours-col{display:none;}
+  .hours-visible .hours-col{display:block;}
+  .icon-btn{
+    width:32px;height:32px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:#FAFCFA;
+    color:var(--danger);
+    cursor:pointer;
+    font-size:16px;
+    line-height:1;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .add-player{
+    margin-top:4px;
+    padding:9px 14px;
+    border-radius:8px;
+    border:1px dashed var(--court-light);
+    background:none;
+    color:var(--court);
+    font-family:inherit;
+    font-size:13px;
+    cursor:pointer;
+    width:100%;
+  }
+
+  .result-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding-bottom:14px;
+    margin-bottom:14px;
+    border-bottom:1px solid var(--line);
+  }
+  .result-total .num{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:26px;
+    font-weight:600;
+    color:var(--court);
+  }
+  .result-total .label{
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  .result-line{
+    display:flex;
+    justify-content:space-between;
+    padding:9px 0;
+    border-bottom:1px solid var(--line);
+    font-size:14px;
+  }
+  .result-line:last-child{border-bottom:none;}
+  .result-line .name{font-weight:500;}
+  .result-line .sub{color:var(--muted);font-size:12px;display:block;}
+  .result-line .amount{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+  }
+
+  .empty-note{
+    color:var(--muted);
+    font-size:13.5px;
+    line-height:1.5;
+    padding:6px 0;
+  }
+
+  .actions{
+    display:flex;
+    gap:10px;
+    margin-top:18px;
+  }
+  .btn-primary{
+    flex:1;
+    padding:11px 14px;
+    border-radius:8px;
+    border:none;
+    background:var(--cork);
+    color:#1A1A1A;
+    font-family:inherit;
+    font-weight:600;
+    font-size:14px;
+    cursor:pointer;
+  }
+  .btn-secondary{
+    padding:11px 14px;
+    border-radius:8px;
+    border:1px solid var(--line);
+    background:none;
+    color:var(--muted);
+    font-family:inherit;
+    font-size:14px;
+    cursor:pointer;
+  }
+
+  .history{
+    margin-top:20px;
+  }
+  .history-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px 0;
+    border-bottom:1px solid var(--line);
+    font-size:13.5px;
+  }
+  .history-item:last-child{border-bottom:none;}
+  .history-item .h-date{color:var(--muted);font-size:12px;}
+  .history-item button{
+    background:none;border:none;color:var(--danger);cursor:pointer;font-size:12px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="brand">SÂN CẦU LÔNG</p>
+  <h1>Tính tiền cầu lông</h1>
+  <p>Nhập tiền sân, tiền cầu và số người chơi — chia tiền công bằng theo đầu người hoặc theo giờ, xong buổi nào lưu buổi đó.</p>
+</header>
+
+<div class="wrap">
+  <div class="grid">
+
+    <div class="card">
+      <h2>Chi phí buổi chơi</h2>
+
+      <label for="courtFee">Tiền sân (đ)</label>
+      <input type="number" id="courtFee" placeholder="0" min="0">
+
+      <div class="cost-row">
+        <div>
+          <label for="shuttleCount">Số quả cầu</label>
+          <input type="number" id="shuttleCount" placeholder="0" min="0">
+        </div>
+        <div>
+          <label for="shuttlePrice">Giá 1 quả (đ)</label>
+          <input type="number" id="shuttlePrice" placeholder="0" min="0">
+        </div>
+      </div>
+
+      <label for="otherFee">Chi phí khác (nước, gửi xe...)</label>
+      <input type="number" id="otherFee" placeholder="0" min="0">
+
+      <label style="margin-top:18px;">Cách chia tiền</label>
+      <div class="split-choice">
+        <button class="split-btn active" data-mode="even">Chia đều</button>
+        <button class="split-btn" data-mode="hours">Theo giờ chơi</button>
+      </div>
+
+      <div class="players" id="playersBox">
+        <label style="margin-top:18px;">Danh sách người chơi</label>
+        <div id="playerRows"></div>
+        <button class="add-player" id="addPlayerBtn">+ Thêm người chơi</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn-primary" id="saveBtn">Lưu buổi này</button>
+        <button class="btn-secondary" id="resetBtn">Làm mới</button>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Kết quả</h2>
+        <div id="resultBox"></div>
+      </div>
+
+      <div class="card history">
+        <h2>Lịch sử các buổi</h2>
+        <div id="historyBox">
+          <p class="empty-note">Chưa có buổi nào được lưu.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  const playerRows = document.getElementById('playerRows');
+  const playersBoxEl = document.getElementById('playersBox');
+  const addPlayerBtn = document.getElementById('addPlayerBtn');
+  const courtFee = document.getElementById('courtFee');
+  const shuttleCount = document.getElementById('shuttleCount');
+  const shuttlePrice = document.getElementById('shuttlePrice');
+  const otherFee = document.getElementById('otherFee');
+  const resultBox = document.getElementById('resultBox');
+  const historyBox = document.getElementById('historyBox');
+  const splitBtns = document.querySelectorAll('.split-btn');
+  const saveBtn = document.getElementById('saveBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let splitMode = 'even';
+  let playerId = 0;
+
+  function fmt(n){
+    return Math.round(n||0).toLocaleString('vi-VN') + ' đ';
+  }
+
+  function addPlayerRow(name, hours){
+    playerId++;
+    const row = document.createElement('div');
+    row.className = 'player-row';
+    row.dataset.id = playerId;
+    row.innerHTML = `
+      <input type="text" class="p-name" placeholder="Tên người chơi" value="${name || ''}">
+      <input type="number" class="p-hours hours-col" placeholder="Số giờ" min="0" step="0.5" value="${hours || ''}">
+      <button class="icon-btn remove-player" title="Xoá">✕</button>
+    `;
+    playerRows.appendChild(row);
+    row.querySelector('.p-name').addEventListener('input', calculate);
+    row.querySelector('.p-hours').addEventListener('input', calculate);
+    row.querySelector('.remove-player').addEventListener('click', () => {
+      row.remove();
+      calculate();
+    });
+  }
+
+  addPlayerBtn.addEventListener('click', () => {
+    addPlayerRow();
+    calculate();
+  });
+
+  splitBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      splitBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      splitMode = btn.dataset.mode;
+      playersBoxEl.classList.toggle('hours-visible', splitMode === 'hours');
+      calculate();
+    });
+  });
+
+  [courtFee, shuttleCount, shuttlePrice, otherFee].forEach(el => {
+    el.addEventListener('input', calculate);
+  });
+
+  function getPlayers(){
+    return [...playerRows.querySelectorAll('.player-row')].map(row => ({
+      name: row.querySelector('.p-name').value.trim(),
+      hours: parseFloat(row.querySelector('.p-hours').value) || 0
+    }));
+  }
+
+  function calculate(){
+    const total = (parseFloat(courtFee.value)||0)
+      + (parseFloat(shuttleCount.value)||0) * (parseFloat(shuttlePrice.value)||0)
+      + (parseFloat(otherFee.value)||0);
+
+    const players = getPlayers();
+
+    resultBox.innerHTML = '';
+
+    const totalRow = document.createElement('div');
+    totalRow.className = 'result-total';
+    totalRow.innerHTML = `<span class="label">Tổng chi phí buổi chơi</span><span class="num">${fmt(total)}</span>`;
+    resultBox.appendChild(totalRow);
+
+    if(players.length === 0){
+      const p = document.createElement('p');
+      p.className = 'empty-note';
+      p.textContent = 'Thêm người chơi để xem số tiền mỗi người phải trả.';
+      resultBox.appendChild(p);
+      return { total, players, shares: [] };
+    }
+
+    let shares = [];
+    if(splitMode === 'even'){
+      const perHead = total / players.length;
+      shares = players.map(p => ({ ...p, amount: perHead }));
+    } else {
+      const totalHours = players.reduce((s,p) => s + p.hours, 0);
+      if(totalHours <= 0){
+        shares = players.map(p => ({ ...p, amount: 0 }));
+      } else {
+        shares = players.map(p => ({ ...p, amount: total * (p.hours / totalHours) }));
+      }
+    }
+
+    shares.forEach((p, i) => {
+      const line = document.createElement('div');
+      line.className = 'result-line';
+      const subText = splitMode === 'hours' ? `${p.hours || 0} giờ` : '';
+      line.innerHTML = `
+        <span>
+          <span class="name">${p.name || 'Người chơi ' + (i+1)}</span>
+          ${subText ? `<span class="sub">${subText}</span>` : ''}
+        </span>
+        <span class="amount">${fmt(p.amount)}</span>
+      `;
+      resultBox.appendChild(line);
+    });
+
+    return { total, players, shares };
+  }
+
+  // ---- Lưu / lịch sử dùng localStorage ----
+  const STORAGE_KEY = 'badminton_sessions';
+
+  function loadHistory(){
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    } catch(e){
+      return [];
+    }
+  }
+
+  function saveHistory(list){
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    } catch(e){}
+  }
+
+  function renderHistory(){
+    const list = loadHistory();
+    historyBox.innerHTML = '';
+    if(list.length === 0){
+      historyBox.innerHTML = '<p class="empty-note">Chưa có buổi nào được lưu.</p>';
+      return;
+    }
+    list.slice().reverse().forEach(item => {
+      const row = document.createElement('div');
+      row.className = 'history-item';
+      row.innerHTML = `
+        <span>
+          <div>${item.total.toLocaleString('vi-VN')} đ · ${item.playerCount} người</div>
+          <span class="h-date">${item.date}</span>
+        </span>
+        <button data-id="${item.id}">Xoá</button>
+      `;
+      row.querySelector('button').addEventListener('click', () => {
+        const updated = loadHistory().filter(x => x.id !== item.id);
+        saveHistory(updated);
+        renderHistory();
+      });
+      historyBox.appendChild(row);
+    });
+  }
+
+  saveBtn.addEventListener('click', () => {
+    const result = calculate();
+    if(result.players.length === 0){
+      alert('Hãy thêm ít nhất một người chơi trước khi lưu.');
+      return;
+    }
+    const list = loadHistory();
+    list.push({
+      id: Date.now(),
+      date: new Date().toLocaleString('vi-VN'),
+      total: Math.round(result.total),
+      playerCount: result.players.length
+    });
+    saveHistory(list);
+    renderHistory();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    courtFee.value = '';
+    shuttleCount.value = '';
+    shuttlePrice.value = '';
+    otherFee.value = '';
+    playerRows.innerHTML = '';
+    addPlayerRow();
+    addPlayerRow();
+    calculate();
+  });
+
+  // Khởi tạo
+  addPlayerRow();
+  addPlayerRow();
+  calculate();
+  renderHistory();
+})();
+</script>
+
+</body>
+</html>
